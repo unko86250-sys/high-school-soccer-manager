@@ -1,0 +1,1445 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高校サッカーマネージャー</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#07111f;
+  color:#eef5ff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:#0b1b2d;
+  padding:12px 16px;
+  border-bottom:1px solid #28415d;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center
+}
+h1{font-size:20px;margin:0}
+h2{margin-top:0}
+.muted{color:#9fb0c7}
+nav{
+  position:sticky;
+  top:61px;
+  z-index:4;
+  display:flex;
+  gap:6px;
+  overflow:auto;
+  background:#091522;
+  padding:8px
+}
+button,select{font:inherit}
+button{
+  border:0;
+  border-radius:9px;
+  padding:9px 13px;
+  background:#1683d8;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer
+}
+button:hover{background:#2396ed}
+button:disabled{opacity:.5;cursor:not-allowed}
+select{
+  background:#10263c;
+  color:#fff;
+  border:1px solid #31516e;
+  border-radius:8px;
+  padding:8px
+}
+.wrap{
+  max-width:1250px;
+  margin:auto;
+  padding:16px
+}
+.screen{display:none}
+.screen.active{display:block}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px
+}
+.card{
+  background:#0d2034;
+  border:1px solid #203b57;
+  border-radius:14px;
+  padding:15px;
+  margin-bottom:12px
+}
+.stat{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  border-bottom:1px solid #ffffff12
+}
+.big{font-size:30px;font-weight:800}
+.badge{
+  display:inline-block;
+  background:#183a59;
+  border-radius:7px;
+  padding:3px 6px;
+  margin:2px;
+  font-size:12px
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  display:block;
+  overflow:auto
+}
+th,td{
+  padding:7px;
+  border-bottom:1px solid #ffffff14;
+  text-align:left;
+  white-space:nowrap
+}
+.notice{
+  padding:12px;
+  background:#10263b;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-bottom:12px
+}
+.pitch{
+  width:min(520px,100%);
+  aspect-ratio:1.35;
+  background:#176c3a;
+  border:3px solid #d8f3dc;
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+  margin:14px auto
+}
+.pitch:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:0;
+  bottom:0;
+  border-left:2px solid #d8f3dc
+}
+.pitch:after{
+  content:"";
+  position:absolute;
+  left:35%;
+  top:50%;
+  width:30%;
+  aspect-ratio:2;
+  border:2px solid #d8f3dc;
+  border-radius:50%;
+  transform:translateY(-50%)
+}
+.p{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  width:68px;
+  text-align:center;
+  font-size:11px
+}
+.p b{
+  display:block;
+  background:#0b1b2dcc;
+  border-radius:8px;
+  padding:4px
+}
+.row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center
+}
+.schoolBtn{
+  margin:3px;
+  font-size:12px
+}
+@media(max-width:600px){
+  header{align-items:flex-start}
+  header h1{font-size:17px}
+  .wrap{padding:10px}
+  nav{top:58px}
+  button{padding:10px 12px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <h1>⚽ 高校サッカーマネージャー</h1>
+    <span id="schoolTitle" class="muted"></span>
+  </div>
+  <div>
+    ¥<b id="money">0</b>
+   　📅 <b id="date"></b>
+    <button onclick="save()">保存</button>
+  </div>
+</header>
+
+<nav>
+  <button onclick="show('home')">ホーム</button>
+  <button onclick="show('players')">選手</button>
+  <button onclick="show('tactics')">戦術</button>
+  <button onclick="show('training')">練習</button>
+  <button onclick="show('practice')">練習試合</button>
+  <button onclick="show('competitions')">大会</button>
+  <button onclick="show('scout')">スカウト</button>
+  <button onclick="show('facility')">施設</button>
+  <button onclick="show('career')">監督キャリア</button>
+</nav>
+
+<main class="wrap">
+
+<section id="home" class="screen active">
+  <div class="notice">
+    開成高校からスタート。学校の強さは新入生・育成・施設・実績などで毎年変化します。
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>チーム状況</h2>
+      <div id="teamOvr" class="big">OVR 0</div>
+      <div class="stat">
+        <span>士気</span>
+        <b id="morale">0</b>
+      </div>
+      <div class="stat">
+        <span>評判</span>
+        <b id="rep">0</b>
+      </div>
+      <div class="stat">
+        <span>平均疲労</span>
+        <b id="fatigue">0</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>次の予定</h2>
+      <p id="nextEvent"></p>
+      <button onclick="advanceMonth()">月を進める</button>
+    </div>
+
+    <div class="card">
+      <h2>今季成績</h2>
+      <div class="stat">
+        <span>公式戦</span>
+        <b id="record"></b>
+      </div>
+      <div class="stat">
+        <span>得点</span>
+        <b id="goals"></b>
+      </div>
+      <div class="stat">
+        <span>全国出場</span>
+        <b id="national"></b>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>ニュース</h2>
+    <div id="news"></div>
+  </div>
+</section>
+
+
+<section id="players" class="screen">
+  <div class="card">
+    <h2>選手一覧</h2>
+    <div id="playersTable"></div>
+  </div>
+</section>
+
+
+<section id="tactics" class="screen">
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>フォーメーション・戦術</h2>
+
+      <div class="row">
+        <select id="formation" onchange="changeFormation()">
+          <option>4-4-2</option>
+          <option>4-3-3</option>
+          <option>4-2-3-1</option>
+          <option>3-4-3</option>
+        </select>
+
+        <select id="tactic" onchange="changeTactic()">
+          <option value="balance">バランス</option>
+          <option value="attack">攻撃重視</option>
+          <option value="defense">守備重視</option>
+          <option value="counter">カウンター</option>
+          <option value="possession">ポゼッション</option>
+        </select>
+      </div>
+
+      <div id="pitch"></div>
+    </div>
+
+    <div class="card">
+      <h2>キャプテン</h2>
+
+      <select id="captain" onchange="changeCaptain()"></select>
+
+      <div class="stat">
+        <span>チーム士気</span>
+        <b id="tMorale"></b>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="training" class="screen">
+  <div class="card">
+    <h2>練習</h2>
+    <p class="muted">成長するほど疲労も増えます。</p>
+    <div id="trainingButtons" class="grid"></div>
+  </div>
+</section>
+
+
+<section id="practice" class="screen">
+  <div class="card">
+    <h2>練習試合</h2>
+    <div id="practiceButtons" class="grid"></div>
+    <div id="matchLog"></div>
+  </div>
+</section>
+
+
+<section id="competitions" class="screen">
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>年間スケジュール</h2>
+
+      <table>
+        <tr>
+          <th>時期</th>
+          <th>内容</th>
+        </tr>
+        <tr>
+          <td>4月</td>
+          <td>新入生・新チーム</td>
+        </tr>
+        <tr>
+          <td>6〜7月</td>
+          <td>夏季地区→東京大会</td>
+        </tr>
+        <tr>
+          <td>7〜8月</td>
+          <td>インターハイ全国</td>
+        </tr>
+        <tr>
+          <td>9〜11月</td>
+          <td>練習・スカウト</td>
+        </tr>
+        <tr>
+          <td>12〜1月</td>
+          <td>冬季地区→東京大会</td>
+        </tr>
+        <tr>
+          <td>1〜2月</td>
+          <td>冬選手権全国</td>
+        </tr>
+        <tr>
+          <td>2月</td>
+          <td>新人大会</td>
+        </tr>
+        <tr>
+          <td>3月</td>
+          <td>卒業・新年度準備</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>公式戦</h2>
+
+      <p>
+        全国は48校・12組。
+        各組上位2校＋3位上位8校が決勝トーナメントへ。
+      </p>
+
+      <button onclick="officialMatch()">公式戦を進める</button>
+
+      <div id="officialLog"></div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="scout" class="screen">
+  <div class="card">
+    <h2>スカウト</h2>
+
+    <p>
+      ¥30,000で新入生候補を発見します。
+    </p>
+
+    <button onclick="scout()">スカウト実行</button>
+
+    <div id="scoutResult"></div>
+  </div>
+</section>
+
+
+<section id="facility" class="screen">
+  <div class="card">
+    <h2>施設</h2>
+    <div id="facilities"></div>
+  </div>
+</section>
+
+
+<section id="career" class="screen">
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>監督キャリア</h2>
+      <div id="careerStats"></div>
+    </div>
+
+    <div class="card">
+      <h2>東京の転任先</h2>
+      <div id="schools"></div>
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<script>
+
+const KEY = "hs_manager_complete_v8";
+
+const POS = [
+  "GK","CB","SB","DMF","CMF","OMF","WG","ST","CF"
+];
+
+const AB = {
+  GK:[
+    "セービング","反応","1対1キーパー",
+    "ハイボール処理","フィード","PKストップ"
+  ],
+  CB:[
+    "マンマーク","インターセプト","ブロック",
+    "空中戦","対人守備","ビルドアップ","カバーリング"
+  ],
+  SB:[
+    "オーバーラップ","クロス","スピードスター",
+    "インターセプト","守備参加","スタミナ"
+  ],
+  DMF:[
+    "ボール奪取","アンカー","インターセプト",
+    "ロングパス","カバーリング","ゲームメイク"
+  ],
+  CMF:[
+    "パスセンス","ボックス・トゥ・ボックス",
+    "ゲームメイク","ミドルシュート",
+    "プレッシング","スタミナ"
+  ],
+  OMF:[
+    "チャンスメイク","スルーパス","ドリブル",
+    "ラストパス","ミドルシュート","テクニック"
+  ],
+  WG:[
+    "ドリブル","スピードスター","カットイン",
+    "クロス","1対1","アシスト"
+  ],
+  ST:[
+    "ストライカー","決定力","裏抜け",
+    "ポストプレー","ヘディング","ワンタッチシュート"
+  ],
+  CF:[
+    "ストライカー","決定力","裏抜け",
+    "ポストプレー","ヘディング","ワンタッチシュート"
+  ]
+};
+
+const N1=[
+  "青木","石田","伊藤","上田","大野","岡田",
+  "加藤","川村","木村","小林","斎藤","佐々木",
+  "清水","鈴木","高橋","田中","中村","西村",
+  "橋本","藤井","松本","山田","吉田","渡辺"
+];
+
+const N2=[
+  "翔","蓮","湊","悠真","陽斗","颯太",
+  "大和","陸","蒼","樹","健太","直人",
+  "拓海","海斗","優斗","駿","悠","玲央",
+  "奏","智也"
+];
+
+function R(a,b){
+  return Math.floor(Math.random()*(b-a+1))+a;
+}
+
+function N(){
+  return N1[R(0,N1.length-1)]+" "+N2[R(0,N2.length-1)];
+}
+
+
+function makeSchools(){
+
+  let a=["開成高校"];
+
+  for(let i=1;i<64;i++){
+    a.push("東京"+String(i).padStart(2,"0")+"高校");
+  }
+
+  [
+    "北海道","青森","岩手","宮城","秋田","山形",
+    "福島","茨城","栃木","群馬","埼玉","千葉",
+    "神奈川","新潟","富山","石川","福井","山梨",
+    "長野","岐阜","静岡","愛知","三重","滋賀",
+    "京都","大阪","兵庫","奈良","和歌山","鳥取",
+    "島根","岡山","広島","山口","徳島","香川",
+    "愛媛","高知","福岡","佐賀","長崎","熊本",
+    "大分","宮崎","鹿児島","沖縄"
+  ].forEach(x=>{
+    for(let j=1;j<=4;j++){
+      a.push(x+j+"代表校");
+    }
+  });
+
+  return a;
+}
+
+
+function makePlayer(grade=1){
+
+  let position=POS[R(0,POS.length-1)];
+
+  let b=R(42,68);
+
+  let stats={
+    kick:R(b-8,b+6),
+    pass:R(b-8,b+6),
+    dribble:R(b-8,b+6),
+    defense:R(b-8,b+6),
+    speed:R(b-8,b+6),
+    physical:R(b-8,b+6)
+  };
+
+  let abilities=[];
+
+  abilities.push(
+    AB[position][R(0,AB[position].length-1)]
+  );
+
+  abilities.push(
+    AB[position][R(0,AB[position].length-1)]
+  );
+
+  return {
+    id:Date.now()+Math.random(),
+    name:N(),
+    grade:grade,
+    position:position,
+    ovr:Math.round(
+      Object.values(stats).reduce((a,b)=>a+b,0)/6
+    ),
+    potential:R(58,88),
+    condition:R(70,100),
+    fatigue:R(5,25),
+    morale:R(60,90),
+    injury:0,
+    stats:stats,
+    abilities:abilities
+  };
+}
+
+
+function fresh(){
+
+  let players=Array.from(
+    {length:11},
+    (_,i)=>makePlayer(
+      i<4 ? 1 : i<8 ? 2 : 3
+    )
+  );
+
+  players[0].position="GK";
+  players[0].abilities=AB.GK.slice(0,2);
+
+  return {
+    year:2026,
+    month:4,
+
+    school:"開成高校",
+
+    money:300000,
+
+    rep:0,
+    morale:55,
+
+    formation:"4-4-2",
+    tactic:"balance",
+
+    captain:players[0].id,
+
+    players:players,
+
+    fac:{
+      ground:1,
+      training:1,
+      analysis:1,
+      strength:1
+    },
+
+    career:{
+      wins:0,
+      draws:0,
+      losses:0,
+      titles:0,
+      national:0,
+      years:0
+    },
+
+    season:{
+      w:0,
+      d:0,
+      l:0,
+      gf:0
+    },
+
+    schools:makeSchools(),
+
+    news:[
+      "新年度スタート。開成高校の監督に就任しました。"
+    ],
+
+    next:"新入生加入・チーム編成"
+  };
+}
+
+
+let S;
+
+try{
+  S=JSON.parse(
+    localStorage.getItem(KEY)
+  );
+}catch(e){
+  S=null;
+}
+
+if(!S){
+  S=fresh();
+}
+
+
+function save(){
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(S)
+  );
+
+  render();
+}
+
+
+function show(id){
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(x=>x.classList.remove("active"));
+
+  document
+    .getElementById(id)
+    .classList.add("active");
+
+  render();
+}
+
+
+function avg(){
+
+  let players=S.players.filter(
+    p=>!p.injury
+  );
+
+  if(!players.length)return 0;
+
+  return Math.round(
+    players.reduce((x,p)=>x+p.ovr,0)/players.length
+  );
+}
+
+
+function render(){
+
+  document.getElementById("schoolTitle").textContent=
+    S.school+"　監督キャリア";
+
+  document.getElementById("money").textContent=
+    S.money.toLocaleString();
+
+  document.getElementById("date").textContent=
+    S.year+"年"+S.month+"月";
+
+  document.getElementById("teamOvr").textContent=
+    "OVR "+avg();
+
+  document.getElementById("morale").textContent=
+    S.morale;
+
+  document.getElementById("rep").textContent=
+    S.rep;
+
+  let avgFatigue=
+    Math.round(
+      S.players.reduce((a,p)=>a+p.fatigue,0)/
+      Math.max(1,S.players.length)
+    );
+
+  document.getElementById("fatigue").textContent=
+    avgFatigue;
+
+  document.getElementById("record").textContent=
+    S.season.w+"勝 "+
+    S.season.d+"分 "+
+    S.season.l+"敗";
+
+  document.getElementById("goals").textContent=
+    S.season.gf;
+
+  document.getElementById("national").textContent=
+    S.career.national;
+
+  document.getElementById("nextEvent").textContent=
+    S.next;
+
+  document.getElementById("news").innerHTML=
+    S.news
+      .slice(0,5)
+      .map(x=>"<p>• "+x+"</p>")
+      .join("");
+
+  renderPlayers();
+  renderTactics();
+  renderTraining();
+  renderPractice();
+  renderFacilities();
+  renderCareer();
+}
+
+
+function renderPlayers(){
+
+  let html=
+    "<table>"+
+    "<tr>"+
+    "<th>名前</th>"+
+    "<th>学年</th>"+
+    "<th>位置</th>"+
+    "<th>OVR</th>"+
+    "<th>潜在</th>"+
+    "<th>調子</th>"+
+    "<th>疲労</th>"+
+    "<th>状態</th>"+
+    "<th>能力</th>"+
+    "</tr>";
+
+  S.players.forEach(p=>{
+
+    html+=
+      "<tr>"+
+      "<td>"+p.name+"</td>"+
+      "<td>"+p.grade+"年</td>"+
+      "<td>"+p.position+"</td>"+
+      "<td><b>"+p.ovr+"</b></td>"+
+      "<td>"+p.potential+"</td>"+
+      "<td>"+p.condition+"</td>"+
+      "<td>"+p.fatigue+"</td>"+
+      "<td>"+
+      (p.injury ?
+        "負傷 "+p.injury+"週" :
+        "出場可"
+      )+
+      "</td>"+
+      "<td>"+
+      p.abilities
+        .map(a=>'<span class="badge">'+a+"</span>")
+        .join("")+
+      "</td>"+
+      "</tr>";
+
+  });
+
+  html+="</table>";
+
+  document.getElementById("playersTable").innerHTML=
+    html;
+
+  document.getElementById("captain").innerHTML=
+    S.players
+      .map(p=>
+        '<option value="'+p.id+'" '+
+        (p.id==S.captain?"selected":"")+
+        ">"+
+        p.name+
+        " ("+
+        p.position+
+        ", OVR"+
+        p.ovr+
+        ")</option>"
+      )
+      .join("");
+
+  document.getElementById("tMorale").textContent=
+    S.morale;
+}
+
+
+function changeFormation(){
+
+  S.formation=
+    document.getElementById("formation").value;
+
+  save();
+}
+
+
+function changeTactic(){
+
+  S.tactic=
+    document.getElementById("tactic").value;
+
+  save();
+}
+
+
+function changeCaptain(){
+
+  S.captain=
+    document.getElementById("captain").value;
+
+  save();
+}
+
+
+function renderTactics(){
+
+  document.getElementById("formation").value=
+    S.formation;
+
+  document.getElementById("tactic").value=
+    S.tactic;
+
+  let f=S.formation;
+
+  let positions;
+
+  if(f==="4-4-2"){
+
+    positions=[
+      [8,50],
+      [22,20],[22,40],[22,60],[22,80],
+      [48,20],[48,40],[48,60],[48,80],
+      [76,35],[76,65]
+    ];
+
+  }else if(f==="4-3-3"){
+
+    positions=[
+      [8,50],
+      [22,20],[22,40],[22,60],[22,80],
+      [48,25],[48,50],[48,75],
+      [78,25],[78,50],[78,75]
+    ];
+
+  }else if(f==="4-2-3-1"){
+
+    positions=[
+      [8,50],
+      [22,20],[22,40],[22,60],[22,80],
+      [45,35],[45,65],
+      [63,20],[63,50],[63,80],
+      [82,50]
+    ];
+
+  }else{
+
+    positions=[
+      [8,50],
+      [23,30],[23,50],[23,70],
+      [48,20],[48,40],[48,60],[48,80],
+      [78,25],[78,50],[78,75]
+    ];
+  }
+
+  document.getElementById("pitch").innerHTML=
+    '<div class="pitch">'+
+    positions.map((v,i)=>
+      '<div class="p" style="left:'+
+      v[1]+'%;top:'+v[0]+'%">'+
+      '<b>'+(i+1)+'</b>'+
+      '</div>'
+    ).join("")+
+    "</div>";
+}
+
+
+function renderTraining(){
+
+  let training=[
+    ["攻撃","kick"],
+    ["守備","defense"],
+    ["パス","pass"],
+    ["シュート","kick"],
+    ["フィジカル","physical"],
+    ["戦術","pass"],
+    ["コンディショニング","condition"]
+  ];
+
+  document.getElementById("trainingButtons").innerHTML=
+    training.map(x=>
+      '<button onclick="train(\''+
+      x[1]+
+      "','"+
+      x[0]+
+      "')\">"+
+      x[0]+
+      "練習</button>"
+    ).join("");
+}
+
+
+function train(stat,name){
+
+  S.players.forEach(p=>{
+
+    if(p.injury)return;
+
+    if(name==="コンディショニング"){
+
+      p.fatigue=
+        Math.max(0,p.fatigue-8);
+
+      p.condition=
+        Math.min(100,p.condition+8);
+
+    }else{
+
+      p.fatigue=
+        Math.min(100,p.fatigue+8);
+
+      if(stat==="condition"){
+
+        p.condition=
+          Math.min(100,p.condition+8);
+
+      }else{
+
+        p.stats[stat]=
+          Math.min(99,p.stats[stat]+R(0,2));
+
+        p.ovr=
+          Math.round(
+            Object.values(p.stats)
+              .reduce((a,b)=>a+b,0)/6
+          );
+      }
+    }
+  });
+
+  S.morale=
+    Math.min(100,S.morale+1);
+
+  S.news.unshift(
+    name+"を実施。"
+  );
+
+  save();
+}
+
+
+function renderPractice(){
+
+  let a=[
+    ["弱小",5000,43,57,3000,0],
+    ["中堅",10000,55,68,7000,1],
+    ["ライバル",18000,64,78,12000,2],
+    ["強豪",30000,74,91,20000,3]
+  ];
+
+  document.getElementById("practiceButtons").innerHTML=
+    a.map(x=>
+      '<div class="card">'+
+      "<h3>"+x[0]+"</h3>"+
+      "<p>相手OVR "+x[2]+"–"+x[3]+
+      " / 費用 ¥"+x[1].toLocaleString()+
+      "</p>"+
+      '<button onclick="practice('+
+      x[1]+","+
+      x[2]+","+
+      x[3]+","+
+      x[4]+","+
+      x[5]+
+      ',\''+
+      x[0]+
+      "')\">試合する</button>"+
+      "</div>"
+    ).join("");
+}
+
+
+function result(opp){
+
+  let own=
+    avg()+
+    S.morale*0.08-
+    S.players.reduce(
+      (a,p)=>a+p.fatigue,0
+    )/
+    Math.max(1,S.players.length)*
+    0.06;
+
+  if(S.tactic==="attack")own+=2;
+  if(S.tactic==="defense")own+=1;
+  if(S.tactic==="counter")own+=1.5;
+  if(S.tactic==="possession")own+=1;
+
+  let o=opp+R(-7,7);
+
+  let x=own+R(-10,10);
+  let y=o+R(-10,10);
+
+  let gf=Math.max(
+    0,
+    Math.round(
+      1.4+(x-y)/13+R(-1,1)
+    )
+  );
+
+  let ga=Math.max(
+    0,
+    Math.round(
+      1.2+(y-x)/13+R(-1,1)
+    )
+  );
+
+  if(gf===ga){
+
+    if(Math.random()<0.48)gf++;
+    else ga++;
+
+  }
+
+  return [gf,ga];
+}
+
+
+function practice(
+  cost,
+  lo,
+  hi,
+  reward,
+  reputationGain,
+  label
+){
+
+  if(S.money<cost){
+
+    document.getElementById("matchLog").innerHTML=
+      '<div class="notice">資金不足。</div>';
+
+    return;
+  }
+
+  S.money-=cost;
+
+  let [g,a]=result(
+    R(lo,hi)
+  );
+
+  if(g>a){
+
+    S.money+=reward;
+    S.rep+=reputationGain;
+
+    S.season.w++;
+    S.career.wins++;
+
+    S.morale=
+      Math.min(100,S.morale+3);
+
+  }else if(g===a){
+
+    S.money+=Math.floor(reward*0.5);
+
+    S.season.d++;
+    S.career.draws++;
+
+  }else{
+
+    S.season.l++;
+    S.career.losses++;
+
+    S.morale=
+      Math.max(35,S.morale-3);
+  }
+
+  S.season.gf+=g;
+
+  S.players.forEach(p=>{
+    p.fatigue=
+      Math.min(100,p.fatigue+15);
+  });
+
+  document.getElementById("matchLog").innerHTML=
+    '<div class="notice">'+
+    label+"："+
+    g+" - "+
+    a+
+    "</div>";
+
+  save();
+}
+
+
+function officialMatch(){
+
+  let opponent=
+    Math.max(
+      45,
+      avg()+R(-12,12)
+    );
+
+  let [g,a]=result(opponent);
+
+  if(g>a){
+
+    S.season.w++;
+    S.career.wins++;
+
+    S.morale=
+      Math.min(100,S.morale+5);
+
+  }else if(g===a){
+
+    S.season.d++;
+    S.career.draws++;
+
+  }else{
+
+    S.season.l++;
+    S.career.losses++;
+
+    S.morale=
+      Math.max(35,S.morale-5);
+  }
+
+  S.season.gf+=g;
+
+  S.players.forEach(p=>{
+    p.fatigue=
+      Math.min(100,p.fatigue+20);
+  });
+
+  document.getElementById("officialLog").innerHTML=
+    '<div class="notice">'+
+    "公式戦 "+
+    g+" - "+a+
+    "</div>";
+
+  save();
+}
+
+
+function scout(){
+
+  if(S.money<30000){
+
+    document.getElementById("scoutResult").innerHTML=
+      "<p>資金不足。</p>";
+
+    return;
+  }
+
+  S.money-=30000;
+
+  let p=makePlayer(1);
+
+  p.ovr=R(50,72);
+  p.potential=R(70,92);
+
+  S.players.push(p);
+
+  document.getElementById("scoutResult").innerHTML=
+    '<div class="notice">'+
+    "候補："+
+    p.name+
+    " / "+
+    p.position+
+    " / OVR"+
+    p.ovr+
+    " / 潜在"+
+    p.potential+
+    "<br>"+
+    p.abilities.join("・")+
+    "</div>";
+
+  save();
+}
+
+
+function renderFacilities(){
+
+  let a=[
+    ["ground","校庭",0],
+    ["training","トレーニングルーム",100000],
+    ["analysis","分析室",280000],
+    ["strength","強化施設",450000]
+  ];
+
+  document.getElementById("facilities").innerHTML=
+    a.map(x=>
+      '<div class="stat">'+
+      "<span>"+
+      x[1]+
+      " Lv"+
+      S.fac[x[0]]+
+      "</span>"+
+      '<button onclick="upgrade(\''+
+      x[0]+
+      "',"+
+      x[2]+
+      ')">'+
+      (
+        S.fac[x[0]]>=5
+        ?
+        "MAX"
+        :
+        "Lv"+(S.fac[x[0]]+1)+"へ"
+      )+
+      "</button>"+
+      "</div>"
+    ).join("");
+}
+
+
+function upgrade(key,baseCost){
+
+  if(S.fac[key]>=5)return;
+
+  let cost=
+    baseCost*(S.fac[key]+1);
+
+  if(S.money<cost)return;
+
+  S.money-=cost;
+
+  S.fac[key]++;
+
+  S.news.unshift(
+    "施設を強化しました。"
+  );
+
+  save();
+}
+
+
+function renderCareer(){
+
+  document.getElementById("careerStats").innerHTML=
+    '<div class="stat">'+
+    "<span>在任年数</span>"+
+    "<b>"+S.career.years+"</b>"+
+    "</div>"+
+
+    '<div class="stat">'+
+    "<span>通算</span>"+
+    "<b>"+
+    S.career.wins+"勝 "+
+    S.career.draws+"分 "+
+    S.career.losses+"敗"+
+    "</b>"+
+    "</div>"+
+
+    '<div class="stat">'+
+    "<span>全国出場</span>"+
+    "<b>"+S.career.national+"</b>"+
+    "</div>"+
+
+    '<div class="stat">'+
+    "<span>全国タイトル</span>"+
+    "<b>"+S.career.titles+"</b>"+
+    "</div>";
+
+  document.getElementById("schools").innerHTML=
+    S.schools
+      .slice(0,64)
+      .map(n=>
+        '<button class="schoolBtn" onclick="moveSchool(\''+
+        n+
+        "')\">"+
+        n+
+        "</button>"
+      )
+      .join("");
+}
+
+
+function moveSchool(name){
+
+  if(name===S.school)return;
+
+  S.school=name;
+
+  S.morale=55;
+
+  S.players=
+    Array.from(
+      {length:R(9,12)},
+      (_,i)=>
+        makePlayer(
+          i<3 ? 1 :
+          i<7 ? 2 : 3
+        )
+    );
+
+  S.season={
+    w:0,
+    d:0,
+    l:0,
+    gf:0
+  };
+
+  S.news.unshift(
+    name+"へ転任しました。"
+  );
+
+  save();
+}
+
+
+function advanceMonth(){
+
+  S.month++;
+
+  if(S.month>12){
+
+    S.month=1;
+    S.year++;
+
+    S.career.years++;
+
+    newYear();
+  }
+
+  S.players.forEach(p=>{
+
+    p.fatigue=
+      Math.max(0,p.fatigue-20);
+
+    p.condition=
+      Math.min(100,p.condition+12);
+
+    if(p.injury>0){
+      p.injury--;
+    }
+  });
+
+  let events={
+    4:"新入生加入・新チーム",
+    6:"夏季地区大会",
+    7:"東京大会",
+    8:"インターハイ全国",
+    9:"練習・育成",
+    10:"練習・育成",
+    11:"練習・スカウト",
+    12:"冬季地区大会",
+    1:"冬選手権全国",
+    2:"新人大会",
+    3:"卒業・新年度準備"
+  };
+
+  S.next=
+    events[S.month]||
+    "練習・調整";
+
+  S.news.unshift(
+    S.year+"年"+S.month+"月になりました。"
+  );
+
+  save();
+}
+
+
+function newYear(){
+
+  let graduates=
+    S.players.filter(
+      p=>p.grade>=3
+    ).length;
+
+  S.players=
+    S.players.filter(
+      p=>p.grade<3
+    );
+
+  S.players.forEach(p=>{
+    p.grade++;
+  });
+
+  let newcomers=R(5,10);
+
+  for(
+    let i=0;
+    i<newcomers && S.players.length<18;
+    i++
+  ){
+    S.players.push(
+      makePlayer(1)
+    );
+  }
+
+  S.season={
+    w:0,
+    d:0,
+    l:0,
+    gf:0
+  };
+
+  S.news.unshift(
+    graduates+
+    "人卒業、新入生"+
+    newcomers+
+    "人加入。"
+  );
+}
+
+
+render();
+
+</script>
+
+</body>
+</html>
